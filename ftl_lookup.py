@@ -65,11 +65,9 @@ print(f'\nНайдено репозиториев: {len(repos)}')
 for repo in repos:
     print(f'\n{repo}')
 
-    ftls_allitems = []
     ftls_page = 1
+    ftls_allitems = []
     while True:
-        
-        
         res = make_request(
             f'https://api.github.com/search/code?q=repo%3Apop-os%2F{repo}%20extension%3Aftl',
             headers={
@@ -103,7 +101,7 @@ for repo in repos:
 
     # Случай 2 -- Требуемая локаль компонента отсутствует полностью
     for name in flt_names_difference:
-        print(f'⭕ {LOCALE_DST}/{name} не существует в https://github.com/pop-os/{repo}')
+        print(f'❌ {LOCALE_DST}/{name} не существует в https://github.com/pop-os/{repo}')
 
 
     for ftl_src_meta, ftl_dst_meta in zip(ftls_src_meta, ftls_dst_meta):
@@ -119,7 +117,7 @@ for repo in repos:
         ftl_src = ftl_src.decode('UTF-8') # Переводим из Unicode в UTF-8
         ftl_src = ftl_src.replace('\n\n', '\n') # Удаляем пустые строки
         if (ftl_src.endswith('\n')):
-            ftl_src = ftl_src[:-2] # Удаляем перенос строки из конца
+            ftl_src = ftl_src[:-1] # Удаляем перенос строки из конца данных, если есть
 
         res = make_request(
             ftl_dst_meta['url'],
@@ -133,7 +131,7 @@ for repo in repos:
         ftl_dst = ftl_dst.decode('UTF-8') # Переводим из Unicode в UTF-8
         ftl_dst = ftl_dst.replace('\n\n', '\n') # Удаляем пустые строки
         if (ftl_dst.endswith('\n')):
-            ftl_dst = ftl_dst[:-2] # Удаляем перенос строки из конца
+            ftl_dst = ftl_dst[:-1] # Удаляем перенос строки из конца данных, если есть
 
         ftl_src_lines = ftl_src.count('\n')
         ftl_dst_lines = ftl_dst.count('\n')
@@ -142,9 +140,9 @@ for repo in repos:
         # не соответствует числу строк в источнике
         if (ftl_src_lines != ftl_dst_lines):
             if (abs(ftl_src_lines - ftl_dst_lines) >= 20):
-                print(f'⏫ https://github.com/pop-os/{repo}/{ftl_dst_meta["path"]}')
+                print(f'⏫ {ftl_dst_meta["html_url"]}')
             else:
-                print(f'🔼 https://github.com/pop-os/{repo}/{ftl_dst_meta["path"]}')
+                print(f'🔼 {ftl_dst_meta["html_url"]}')
             continue
 
 
@@ -183,14 +181,14 @@ for repo in repos:
         # Случай 4 -- Дата посл. коммита источника более
         # поздняя, чем дата посл. коммита требуемой локали
         if (ftl_src_date > ftl_dst_date):
-            print(f'⬆️ https://github.com/pop-os/{repo}/{ftl_dst_meta["path"]}')
+            print(f'⬆️ {ftl_dst_meta["html_url"]}')
             continue
 
 
         # Наконец, случай 5 -- Перевод ftl-файла актуален
         # и содержит совпадающее количество строк (ура!)
-        print(f'✅ https://github.com/pop-os/{repo}/{ftl_dst_meta["path"]}')
+        print(f'✅ {ftl_dst_meta["html_url"]}')
 
 
-print(f'\n=== Итоговое число запросов: {rq_cnt} ({time_cnt} сек.) | FTL_LOOKUP v1.0.0 (24-10-28) ===')
+print(f'\n=== Итоговое число запросов: {rq_cnt} ({time_cnt} сек.) | FTL_LOOKUP v1.0.1 (24-10-28) ===')
 exit(0)

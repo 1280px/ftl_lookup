@@ -52,7 +52,15 @@ def get_ftl_text(url):
 
     ftl_text = base64.b64decode(ftl_text_raw['content']) # GH returns content as Base64
     ftl_text = ftl_text.decode('UTF-8') # convert from Unicode to UTF-8
-    ftl_text = ftl_text.replace('\n\n', '\n') # remove empty lines
+
+    ftl_text = '\n'.join(list(
+        filter(lambda l: not (
+            not l.strip() # filter out empty lines
+            or l.startswith('#') # filter out comments
+            or (l.startswith(' ') and not l.strip().startswith('.')) # filter out multi-line body segments but not substring definitions
+            or l.startswith(('{', '}')) # filter out multi-line tail segments
+        ), ftl_text.split('\n'))
+    ))
     if (ftl_text.endswith('\n')):
         ftl_text = ftl_text[:-1] # remove extra empty line at the end, if present
 
@@ -171,7 +179,7 @@ if __name__ == "__main__":
             # CASE 04 -- No difference in amount of strings, but last
             # source ftl file is newer than last target ftl file
             if (ftl_src_date > ftl_dst_date):
-                print(f'\n⬆️ Newer src ftl -- {ftl_dst_meta["html_url"]}')
+                print(f'\n⬆️ (100%) Newer src -- {ftl_dst_meta["html_url"]}')
                 continue
 
 
@@ -180,5 +188,5 @@ if __name__ == "__main__":
             print(f'\n✅ {ftl_dst_strs}/{ftl_src_strs} (100%) -- {ftl_dst_meta["html_url"]}')
 
 
-    print(f'\n=== Total requests: {req_cnt} ({req_sec} sec) | FTL_LOOKUP v1.1.0 (25-09-05) ===')
+    print(f'\n=== Total requests: {req_cnt} ({req_sec} sec) | FTL_LOOKUP v1.1.1 (25-10-15) ===')
     exit(0)
